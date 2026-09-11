@@ -113,6 +113,13 @@
   .mcat{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
   .mcat span{font-size:12px;background:var(--card);border-radius:10px;padding:3px 9px;border:1px solid var(--line)}
 
+  .dsec{background:var(--card);border-radius:16px;border-bottom:3px solid var(--line);margin-top:10px;overflow:hidden}
+  .dhead{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-family:"Jua";font-size:16px}
+  .dhead small{font-family:"Noto Sans KR";font-size:12px;color:var(--muted);font-weight:500}
+  .dhead b{font-size:16px}
+  .mrow .w{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--sky)}
+  .mrow .w.mom{background:var(--lav)}
+
   /* footer */
   .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
   @media (prefers-reduced-motion:reduce){.stamp{transition:none}}
@@ -247,10 +254,15 @@
 
   <!-- MONEY -->
   <section class="pane" id="money">
-    <div class="grp">💴 여행 가계부 <span>쓰면 바로 적기 · 폰에 저장</span></div>
+    <div class="grp">💴 여행 가계부 <span id="syncStat">⚪ 연결 중…</span></div>
     <div class="mtot" style="grid-template-columns:1fr 1fr">
       <div><b id="tPlan">₩2,020,600</b><small>계획 예산 (엑셀 합계)</small></div>
       <div><b id="tLeft">₩0</b><small>남은 예산</small></div>
+    </div>
+    <div class="mtot">
+      <div><b id="tJ">¥0</b><small>엔화 합계</small></div>
+      <div><b id="tW">₩0</b><small>원화 환산 (<span id="tRate">8.73</span>원/엔)</small></div>
+      <div><b id="tN">0건</b><small>기록</small></div>
     </div>
     <div class="grp" style="margin-top:4px">👆 품목 골라서 바로 기입 <span>누르면 아래 칸에 자동 입력</span></div>
     <div class="mcat" id="presets"></div>
@@ -260,33 +272,28 @@
       <select id="mCur"><option value="JPY">엔 (¥)</option><option value="KRW">원 (₩)</option></select>
       <select id="mDay"><option value="1">1일차</option><option value="2">2일차</option><option value="3">3일차</option><option value="0">출발 전</option></select>
       <select id="mCat"><option>식비</option><option>교통</option><option>입장</option><option>쇼핑</option><option>숙박</option><option>기타</option></select>
-      <select id="mPay" class="full"><option>트래블카드</option><option>신용카드</option><option>현금(엔)</option><option>카카오·네이버페이</option></select>
+      <select id="mWho"><option>교순</option><option>종근</option></select>
+      <select id="mPay"><option>트래블카드</option><option>신용카드</option><option>현금(엔)</option><option>카카오·네이버페이</option></select>
       <button onclick="addExp()">＋ 기입</button>
     </div>
-    <div class="mtot">
-      <div><b id="tJ">¥0</b><small>엔화 합계</small></div>
-      <div><b id="tW">₩0</b><small>원화 환산 (<span id="tRate">8.73</span>원/엔)</small></div>
-      <div><b id="tN">0건</b><small>기록</small></div>
-    </div>
+
+    <div class="grp" style="margin-top:16px">📊 결산 <span>누가 · 분류별</span></div>
     <div class="mcat" id="mcat"></div>
-    <div class="list" id="mlist"></div>
+
+    <div id="daysWrap"></div>
+
     <div style="display:flex;gap:12px;margin-top:8px">
       <button class="reset" onclick="copyExp()">📋 복사 (엑셀에 붙여넣기)</button>
-      <button class="reset" onclick="if(confirm('가계부를 모두 지울까요? (기본값은 다시 채워져요)'))resetKey('exp')">전체 삭제</button>
+      <button class="reset" onclick="if(confirm('가계부를 모두 지울까요? (두 폰 모두 지워져요)'))clearAll()">전체 삭제</button>
     </div>
-    <div class="grp" style="margin-top:14px">🔄 종근 ↔ 교순 합치기 <span>코드 복사 → 카톡으로 전달 → 가져오기</span></div>
-    <div class="mform">
-      <button style="background:#3BA55D" onclick="exportCode()">내 가계부 코드 복사</button>
-      <input id="mCode" class="full" placeholder="상대 폰 코드 붙여넣기">
-      <button style="background:#1F5FBF" onclick="importCode()">가져와서 합치기</button>
-    </div>
-    <div class="tip" style="border-left-color:#1F5FBF;margin-top:14px"><b>💡 사용법</b>결제하자마자 품목·금액만 치고 기입. 복사 버튼 누르면 표 형식으로 복사돼서 엑셀 지출기록 시트에 그대로 붙여넣기 돼요. 두 폰에서 따로 적었으면 '코드 복사 → 가져와서 합치기'로 합쳐요 (중복은 자동 제외).</div>
+    <div class="tip" style="border-left-color:#1F5FBF;margin-top:14px"><b>💡 사용법</b>결제하자마자 품목·금액·누가 냈는지 기입. 종근·교순 폰이 실시간으로 합쳐져요(🟢). 인터넷 끊기면 폰에 저장했다가 연결되면 올라가요. 복사 버튼은 엑셀 지출기록 시트 붙여넣기용.</div>
   </section>
 
   <p class="foot">💕 종근·교순·현우·서우의 오사카 2박 3일</p>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 // ---------- D-day ----------
 (function(){
@@ -382,19 +389,21 @@ function renderList(id,key,items){
 }
 renderList('shop','shop',shop); renderList('pack','pack',pack);
 
-// ---------- 가계부 ----------
+// ---------- 가계부 (Supabase 실시간 동기화) ----------
+const SB_URL='https://bnetptxnjzlenckqgmgc.supabase.co', SB_KEY='sb_publishable_VmyxOt9kyJOq2DgPId5GOA_iqU53Mv9';
 let RATE=8.73; const DAYC={0:'#DDE3EA',1:'#FFD4DF',2:'#FFE3C4',3:'#FFF3B0'};
+const CATE={'식비':'🍜','교통':'🚃','입장':'🎟️','쇼핑':'🛍️','숙박':'🏨','기타':'📦'};
+const DAYBUDGET={0:1143879,1:400000,2:150000,3:330000};
 const expKey='exp';
 const SEED=[
-  {item:'대한항공 유류할증료·세금 (159,500×2 + 180,900×2)',amt:680800,cur:'KRW',day:'0',cat:'교통',pay:'신용카드',t:Date.parse('2026-08-25T10:00')},
-  {item:'쿠로몬 5 숙소 2박 (호텔스닷컴)',amt:200257,cur:'KRW',day:'0',cat:'숙박',pay:'카카오·네이버페이',t:Date.parse('2026-09-04T10:00')},
-  {item:'와쿠와쿠 데이투어 4명 (클룩)',amt:173380,cur:'KRW',day:'0',cat:'입장',pay:'카카오·네이버페이',t:Date.parse('2026-09-03T15:00')},
-  {item:'타이코노유 온천 아이 2명 (클룩)',amt:9642,cur:'KRW',day:'0',cat:'입장',pay:'카카오·네이버페이',t:Date.parse('2026-09-03T15:10')},
-  {item:'여행자보험 4명 (카카오페이손보)',amt:33880,cur:'KRW',day:'0',cat:'기타',pay:'카카오·네이버페이',t:Date.parse('2026-09-04T12:00')},
-  {item:'eSIM 일본 무제한 3일 ×2 (도시락)',amt:16800,cur:'KRW',day:'0',cat:'기타',pay:'카카오·네이버페이',t:Date.parse('2026-09-04T16:46')}
+  {item:'대한항공 유류할증료·세금 (159,500×2 + 180,900×2)',amt:680800,cur:'KRW',day:'0',cat:'교통',pay:'신용카드',who:'종근',t:Date.parse('2026-08-25T10:00')},
+  {item:'쿠로몬 5 숙소 2박 (호텔스닷컴)',amt:200257,cur:'KRW',day:'0',cat:'숙박',pay:'카카오·네이버페이',who:'교순',t:Date.parse('2026-09-04T10:00')},
+  {item:'와쿠와쿠 데이투어 4명 (클룩)',amt:173380,cur:'KRW',day:'0',cat:'입장',pay:'카카오·네이버페이',who:'교순',t:Date.parse('2026-09-03T15:00')},
+  {item:'타이코노유 온천 아이 2명 (클룩)',amt:9642,cur:'KRW',day:'0',cat:'입장',pay:'카카오·네이버페이',who:'교순',t:Date.parse('2026-09-03T15:10')},
+  {item:'여행자보험 4명 (카카오페이손보)',amt:33880,cur:'KRW',day:'0',cat:'기타',pay:'카카오·네이버페이',who:'교순',t:Date.parse('2026-09-04T12:00')},
+  {item:'eSIM 일본 무제한 3일 ×2 (도시락)',amt:16800,cur:'KRW',day:'0',cat:'기타',pay:'카카오·네이버페이',who:'교순',t:Date.parse('2026-09-04T16:46')}
 ].map(e=>({...e,id:'seed'+e.t}));
-let exp=JSON.parse(localStorage.getItem('osaka_'+expKey)||'null');
-if(!exp){exp=SEED.slice();localStorage.setItem('osaka_'+expKey,JSON.stringify(exp));}
+let exp=JSON.parse(localStorage.getItem('osaka_'+expKey)||'null')||SEED.slice();
 const PLAN=2020600;
 const PRESETS=[
   ['급행 공항→난바 (어른2·어린이1)',2330,'교통','1'],['이치란 라멘',5000,'식비','1'],['포켓몬센터',5000,'쇼핑','1'],['마츠모토키요시 약',8000,'쇼핑','1'],
@@ -406,39 +415,58 @@ const pEl=document.getElementById('presets');
 PRESETS.forEach(([n,a,c,d])=>{const b=document.createElement('span');b.textContent=n+' ¥'+a.toLocaleString();b.style.cursor='pointer';
   b.onclick=()=>{document.getElementById('mItem').value=n;document.getElementById('mAmt').value=a;document.getElementById('mCur').value='JPY';document.getElementById('mCat').value=c;document.getElementById('mDay').value=d;document.getElementById('mAmt').focus();};
   pEl.appendChild(b);});
-function saveExp(){localStorage.setItem('osaka_'+expKey,JSON.stringify(exp));function exportCode(){
-  const code=btoa(unescape(encodeURIComponent(JSON.stringify(exp))));
-  navigator.clipboard.writeText(code).then(()=>alert('코드 복사됐어요. 카톡으로 상대에게 보내고, 상대 폰에서 "가져와서 합치기"에 붙여넣기.'),()=>prompt('길게 눌러 복사:',code));
+// 누가 기본값 기억
+const whoSel=document.getElementById('mWho'); whoSel.value=localStorage.getItem('osaka_who')||'교순'; whoSel.onchange=()=>localStorage.setItem('osaka_who',whoSel.value);
+// 오늘 Day 자동
+(function(){const d=Math.round((new Date().setHours(0,0,0,0)-new Date(2026,8,12))/86400000)+1; if(d>=1&&d<=3)document.getElementById('mDay').value=String(d);})();
+
+// --- Supabase ---
+let sb=null, online=false;
+const stat=(t)=>document.getElementById('syncStat').textContent=t;
+function localSave(){localStorage.setItem('osaka_'+expKey,JSON.stringify(exp));}
+async function push(){localSave();renderExp();if(!sb)return;try{const{error}=await sb.from('osaka_expenses').upsert({id:'main',data:exp,updated_at:new Date().toISOString()});if(error)throw error;online=true;stat('🟢 동기화됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));}catch(e){online=false;stat('⚪ 오프라인 · 폰에 저장');}}
+async function initSync(){
+  try{
+    sb=window.supabase.createClient(SB_URL,SB_KEY);
+    const{data,error}=await sb.from('osaka_expenses').select('data').eq('id','main').maybeSingle();
+    if(error)throw error;
+    if(data&&Array.isArray(data.data)){exp=data.data;localSave();renderExp();online=true;stat('🟢 연결됨');}
+    else{await push();}
+    sb.channel('osaka').on('postgres_changes',{event:'*',schema:'public',table:'osaka_expenses',filter:'id=eq.main'},p=>{if(p.new&&Array.isArray(p.new.data)){exp=p.new.data;localSave();renderExp();stat('🟢 동기화됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));}}).subscribe();
+  }catch(e){online=false;stat('⚪ 오프라인 · 폰에 저장');renderExp();}
 }
-function importCode(){
-  try{const arr=JSON.parse(decodeURIComponent(escape(atob(document.getElementById('mCode').value.trim()))));
-    const ids=new Set(exp.map(e=>e.id)); let n=0;
-    arr.forEach(e=>{if(!ids.has(e.id)){exp.push(e);n++;}});
-    exp.sort((a,b)=>b.t-a.t); saveExp(); document.getElementById('mCode').value=''; alert(n+'건 합쳤어요.');
-  }catch(e){alert('코드가 올바르지 않아요. 전체를 정확히 붙여넣어 주세요.');}
-}
-renderExp();}
 function addExp(){
   const item=document.getElementById('mItem').value.trim(), amt=Number(document.getElementById('mAmt').value);
   if(!item||!amt){alert('품목과 금액을 적어주세요');return;}
-  exp.unshift({id:'e'+Date.now()+Math.random().toString(36).slice(2,6),item,amt,cur:document.getElementById('mCur').value,day:document.getElementById('mDay').value,cat:document.getElementById('mCat').value,pay:document.getElementById('mPay').value,t:Date.now()});
-  document.getElementById('mItem').value='';document.getElementById('mAmt').value='';saveExp();
+  exp.unshift({id:'e'+Date.now()+Math.random().toString(36).slice(2,6),item,amt,cur:document.getElementById('mCur').value,day:document.getElementById('mDay').value,cat:document.getElementById('mCat').value,who:whoSel.value,pay:document.getElementById('mPay').value,t:Date.now()});
+  document.getElementById('mItem').value='';document.getElementById('mAmt').value='';push();
 }
-function delExp(i){exp.splice(i,1);saveExp();}
+function delExp(id){exp=exp.filter(e=>e.id!==id);push();}
+function clearAll(){exp=SEED.slice();push();}
 const yen=e=>e.cur==='JPY'?e.amt:e.amt/RATE, won=e=>e.cur==='KRW'?e.amt:e.amt*RATE;
 const fmt=n=>Math.round(n).toLocaleString('ko-KR');
 function renderExp(){
-  const l=document.getElementById('mlist'); l.innerHTML='';
-  exp.forEach((e,i)=>{const r=document.createElement('div');r.className='mrow';
-    r.innerHTML=`<span class="d" style="background:${DAYC[e.day]}">${e.day==='0'?'전':e.day}</span><span class="n">${e.item}<small>${e.cat} · ${e.pay} · ${new Date(e.t).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</small></span><span class="a">${e.cur==='JPY'?'¥'+fmt(e.amt):'₩'+fmt(e.amt)}<small>${e.cur==='JPY'?'≈ ₩'+fmt(won(e)):'≈ ¥'+fmt(yen(e))}</small></span><button class="x" onclick="delExp(${i})">✕</button>`;
-    l.appendChild(r);});
+  exp.sort((a,b)=>(a.day===b.day?b.t-a.t:Number(b.day)-Number(a.day)));
   const tj=exp.reduce((a,e)=>a+yen(e),0), tw=exp.reduce((a,e)=>a+won(e),0);
   document.getElementById('tJ').textContent='¥'+fmt(tj); document.getElementById('tW').textContent='₩'+fmt(tw); document.getElementById('tN').textContent=exp.length+'건';
   const left=PLAN-tw; const tl=document.getElementById('tLeft'); tl.textContent=(left<0?'-':'')+'₩'+fmt(Math.abs(left)); tl.style.color=left<0?'#E5533D':'#3BA55D';
-  const byCat={}; exp.forEach(e=>byCat[e.cat]=(byCat[e.cat]||0)+won(e));
-  const byDay={}; exp.forEach(e=>{const k=e.day==='0'?'출발 전':e.day+'일차';byDay[k]=(byDay[k]||0)+won(e);});
-  document.getElementById('mcat').innerHTML=Object.entries(byDay).map(([k,v])=>`<span>${k} ₩${fmt(v)}</span>`).join('')+Object.entries(byCat).map(([k,v])=>`<span>${k} ₩${fmt(v)}</span>`).join('');
+  const byCat={}, byWho={}; exp.forEach(e=>{byCat[e.cat]=(byCat[e.cat]||0)+won(e);byWho[e.who||'교순']=(byWho[e.who||'교순']||0)+won(e);});
+  document.getElementById('mcat').innerHTML=Object.entries(byWho).map(([k,v])=>`<span style="background:${k==='종근'?'var(--sky)':'var(--lav)'}"><b>${k}</b> ₩${fmt(v)}</span>`).join('')+Object.entries(byCat).map(([k,v])=>`<span>${CATE[k]||''} ${k} ₩${fmt(v)}</span>`).join('');
+  const wrap=document.getElementById('daysWrap'); wrap.innerHTML='';
+  ['1','2','3','0'].forEach(d=>{
+    const rows=exp.filter(e=>e.day===d); if(!rows.length)return;
+    const dw=rows.reduce((a,e)=>a+won(e),0), dj=rows.reduce((a,e)=>a+yen(e),0);
+    const sec=document.createElement('div');sec.className='dsec';
+    const bud=DAYBUDGET[d]; const over=bud&&dw>bud;
+    sec.innerHTML=`<div class="dhead" style="background:${DAYC[d]}"><span>${d==='0'?'출발 전 결제':d+'일차'} <small>${rows.length}건 · 예산 ₩${fmt(bud)}</small></span><b style="color:${over?'#E5533D':'inherit'}">¥${fmt(dj)} · ₩${fmt(dw)}</b></div>`;
+    rows.forEach(e=>{const r=document.createElement('div');r.className='mrow';
+      r.innerHTML=`<span class="d" style="background:${DAYC[d]}">${CATE[e.cat]||'📦'}</span><span class="n">${e.item}<small><span class="w ${e.who==='교순'?'mom':''}">${e.who||'교순'}</span> ${e.cat} · ${e.pay} · ${new Date(e.t).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</small></span><span class="a">${e.cur==='JPY'?'¥'+fmt(e.amt):'₩'+fmt(e.amt)}<small>${e.cur==='JPY'?'≈ ₩'+fmt(won(e)):'≈ ¥'+fmt(yen(e))}</small></span><button class="x" onclick="delExp('${e.id}')">✕</button>`;
+      sec.appendChild(r);});
+    wrap.appendChild(sec);
+  });
 }
+renderExp(); initSync();
+
 // ---------- 환율 (실시간, 수동 덮어쓰기 가능) ----------
 function applyRate(r,label,src){RATE=r;document.getElementById('rate100').textContent='100엔 = '+Math.round(r*100).toLocaleString()+'원';document.getElementById('rate1').textContent=r.toFixed(2);document.getElementById('rateWhen').textContent=label;document.getElementById('rateSrc').textContent=src||'';document.getElementById('tRate').textContent=r.toFixed(2);renderExp();}
 (async function(){
@@ -453,22 +481,10 @@ function applyRate(r,label,src){RATE=r;document.getElementById('rate100').textCo
 document.getElementById('rateEdit').onclick=e=>{e.preventDefault();const v=prompt('1엔당 원화를 입력 (예: 8.73). 0 입력하면 자동 갱신으로 돌아가요.',RATE.toFixed(2));if(v===null)return;const n=Number(v);if(!n){localStorage.removeItem('osaka_rate');location.reload();return;}localStorage.setItem('osaka_rate',n);applyRate(n,'직접 입력값','');};
 
 function copyExp(){
-  const rows=[['Day','날짜','분류','항목','실제(엔)','실제(원)','결제수단']].concat(exp.slice().reverse().map(e=>[e.day==='0'?'':e.day,new Date(e.t).toLocaleDateString('ko-KR'),e.cat,e.item,e.cur==='JPY'?e.amt:'',e.cur==='KRW'?e.amt:'',e.pay]));
+  const rows=[['Day','날짜','분류','항목','실제(엔)','실제(원)','결제수단','누가']].concat(exp.slice().reverse().map(e=>[e.day==='0'?'':e.day,new Date(e.t).toLocaleDateString('ko-KR'),e.cat,e.item,e.cur==='JPY'?e.amt:'',e.cur==='KRW'?e.amt:'',e.pay,e.who||'']));
   const txt=rows.map(r=>r.join('\t')).join('\n');
-  navigator.clipboard.writeText(txt).then(()=>alert('복사됐어요. 엑셀 지출기록 시트 46행부터 붙여넣기 하세요.'),()=>prompt('길게 눌러 복사:',txt));
+  navigator.clipboard.writeText(txt).then(()=>alert('복사됐어요. 엑셀 지출기록 시트 31행부터 붙여넣기 하세요.'),()=>prompt('길게 눌러 복사:',txt));
 }
-function exportCode(){
-  const code=btoa(unescape(encodeURIComponent(JSON.stringify(exp))));
-  navigator.clipboard.writeText(code).then(()=>alert('코드 복사됐어요. 카톡으로 상대에게 보내고, 상대 폰에서 "가져와서 합치기"에 붙여넣기.'),()=>prompt('길게 눌러 복사:',code));
-}
-function importCode(){
-  try{const arr=JSON.parse(decodeURIComponent(escape(atob(document.getElementById('mCode').value.trim()))));
-    const ids=new Set(exp.map(e=>e.id)); let n=0;
-    arr.forEach(e=>{if(!ids.has(e.id)){exp.push(e);n++;}});
-    exp.sort((a,b)=>b.t-a.t); saveExp(); document.getElementById('mCode').value=''; alert(n+'건 합쳤어요.');
-  }catch(e){alert('코드가 올바르지 않아요. 전체를 정확히 붙여넣어 주세요.');}
-}
-renderExp();
 </script>
 </body>
 </html>
